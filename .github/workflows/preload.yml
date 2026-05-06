@@ -1,1 +1,29 @@
+name: Auto Preload ALL
 
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  preload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get file list from GitHub API
+        run: |
+          curl -s https://api.github.com/repos/USERNAME/REPO/git/trees/main?recursive=1 \
+          | grep '"path"' \
+          | sed -E 's/.*"path": "([^"]+)".*/\1/' \
+          > files.txt
+
+      - name: Filter only cstrike files
+        run: |
+          grep '^cstrike/' files.txt > filtered.txt
+
+      - name: Preload cache
+        run: |
+          while read line; do
+            echo "Caching $line"
+            curl -s https://your-worker.workers.dev/$line > /dev/null
+            sleep 0.1
+          done < filtered.txt
