@@ -9,21 +9,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get file list from GitHub API
+      - name: Fetch file list (ONLY FILES)
         run: |
-          curl -s https://api.github.com/repos/mehmednizam28/fastdl/git/trees/main?recursive=1 \
+          curl -s https://api.github.com/repos/USERNAME/REPO/git/trees/main?recursive=1 \
+          | grep '"type": "blob"' -B 5 \
           | grep '"path"' \
-          | sed -E 's/.*"path": "([^"]+)".*/\1/' \
-          > files.txt
+          | cut -d '"' -f4 > files.txt
 
-      - name: Filter only cstrike files
+      - name: Filter csfiles
         run: |
           grep '^csfiles/' files.txt > filtered.txt || true
 
       - name: Preload cache
         run: |
           while read line; do
-            echo "Caching $line"
-            curl -s https://your-worker.workers.dev/$line > /dev/null
-            sleep 0.1
+            if [ ! -z "$line" ]; then
+              echo "Caching $line"
+              curl -s https://your-worker.workers.dev/$line > /dev/null
+              sleep 0.05
+            fi
           done < filtered.txt
