@@ -18,7 +18,7 @@ jobs:
 
       - name: Filter only cstrike files
         run: |
-          grep '^cstrike/' files.txt > filtered.txt
+          grep '^csfiles/' files.txt > filtered.txt || true
 
       - name: Preload cache
         run: |
