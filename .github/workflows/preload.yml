@@ -9,23 +9,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Fetch file list (ONLY FILES)
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Fetch repo tree
         run: |
-          curl -s https://api.github.com/repos/mehmednizam28/fastdl/git/trees/main?recursive=1 \
-          | grep '"type": "blob"' -B 5 \
-          | grep '"path"' \
-          | cut -d '"' -f4 > files.txt
+          curl -s https://api.github.com/repos/mehmednizam28/fastdl/git/trees/main?recursive=1 > tree.json
+
+      - name: Extract files safely
+        run: |
+          jq -r '.tree[] | select(.type=="blob") | .path' tree.json > files.txt
 
       - name: Filter csfiles
         run: |
           grep '^csfiles/' files.txt > filtered.txt || true
 
-      - name: Preload cache
+      - name: Preload cache safely
         run: |
-          while read line; do
-            if [ ! -z "$line" ]; then
-              echo "Caching $line"
-              curl -s https://https://csfastdl.mehmednizam28.workers.dev/$line > /dev/null
+          while IFS= read -r file; do
+            if [ -n "$file" ]; then
+              echo "Caching $file"
+              curl -s --fail "https://csfastdl.mehmednizam28.workers.dev/" || true
               sleep 0.05
             fi
           done < filtered.txt
