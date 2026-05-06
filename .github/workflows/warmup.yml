@@ -1,8 +1,8 @@
 name: Global FastDL Warmup
 on:
   push:
-    branches: [ main ] # Пуска се веднага щом качиш нови файлове
-  workflow_dispatch: # Позволява ти да го пуснеш и ръчно
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   warmup:
@@ -11,12 +11,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Hit Cloudflare Worker for every file
+      - name: Cache Everything from csfiles
         run: |
-          WORKER_URL="https://https://csfastdl.mehmednizam28.workers.dev/"
+          # 1. ЗАМЕНИ С ТВОЯ WORKER URL
+          WORKER_URL="https://csfastdl.mehmednizam28.workers.dev"
           
-          # Влизаме в папка csfiles и търсим там
-          cd csfiles && find . -type f \( -name "*.bsp" -o -name "*.mdl" -o -name "*.wav" -o -name "*.spr" -o -name "*.wad" \) | sed 's|^\./||' | while read file; do
+          # Влизаме в папката csfiles
+          cd csfiles
+          
+          # Търсим всички файлове и ги пращаме към Worker-а
+          find . -type f \( -name "*.bsp" -o -name "*.mdl" -o -name "*.wav" -o -name "*.spr" -o -name "*.wad" \) | sed 's|^\./||' | while read file; do
             echo "Caching: $file"
-            curl -s -I "$WORKER_URL/csfiles/$file" > /dev/null
+            # Пращаме заявка към Worker-а (той няма да знае за csfiles отвън, защото той самият си я добавя)
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$WORKER_URL/$file")
+            echo "Status: $STATUS"
           done
