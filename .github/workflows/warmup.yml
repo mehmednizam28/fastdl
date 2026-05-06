@@ -13,11 +13,10 @@ jobs:
 
       - name: Hit Cloudflare Worker for every file
         run: |
-          # ЗАМЕНИ С ТВОЯ WORKER URL
-          WORKER_URL="https://https://csfastdl.mehmednizam28.workers.dev"
+          WORKER_URL="https://https://csfastdl.mehmednizam28.workers.dev/"
           
-          # Намираме всички карти, модели и звуци и ги "викаме"
-          find . -type f \( -name "*.bsp" -o -name "*.mdl" -o -name "*.wav" -o -name "*.spr" -o -name "*.wad" \) | sed 's|^\./||' | while read file; do
+          # Влизаме в папка csfiles и търсим там
+          cd csfiles && find . -type f \( -name "*.bsp" -o -name "*.mdl" -o -name "*.wav" -o -name "*.spr" -o -name "*.wad" \) | sed 's|^\./||' | while read file; do
             echo "Caching: $file"
-            curl -s -I "$WORKER_URL/$file" > /dev/null
+            curl -s -I "$WORKER_URL/csfiles/$file" > /dev/null
           done
