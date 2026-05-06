@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Fetch file list (ONLY FILES)
         run: |
-          curl -s https://api.github.com/repos/USERNAME/REPO/git/trees/main?recursive=1 \
+          curl -s https://api.github.com/repos/mehmednizam28/fastdl/git/trees/main?recursive=1 \
           | grep '"type": "blob"' -B 5 \
           | grep '"path"' \
           | cut -d '"' -f4 > files.txt
@@ -25,7 +25,7 @@ jobs:
           while read line; do
             if [ ! -z "$line" ]; then
               echo "Caching $line"
-              curl -s https://your-worker.workers.dev/$line > /dev/null
+              curl -s https://https://csfastdl.mehmednizam28.workers.dev/$line > /dev/null
               sleep 0.05
             fi
           done < filtered.txt
