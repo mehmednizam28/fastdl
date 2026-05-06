@@ -1,28 +1,24 @@
-name: Global FastDL Warmup
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+name: FORCE_CACHE_ALL
+on: [push, workflow_dispatch]
 
 jobs:
-  warmup:
+  fill_cache:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache Everything from csfiles
+      - name: Force Download Everything via Worker
         run: |
-          # 1. ЗАМЕНИ С ТВОЯ WORKER URL
-          WORKER_URL="https://csfastdl.mehmednizam28.workers.dev"
+          # 1. ТВОЯТ ЛИНК
+          WORKER_URL="https://https://csfastdl.mehmednizam28.workers.dev"
           
-          # Влизаме в папката csfiles
-          cd csfiles
+          echo "Започвам принудително кеширане на всички файлове..."
           
-          # Търсим всички файлове и ги пращаме към Worker-а
-          find . -type f \( -name "*.bsp" -o -name "*.mdl" -o -name "*.wav" -o -name "*.spr" -o -name "*.wad" \) | sed 's|^\./||' | while read file; do
-            echo "Caching: $file"
-            # Пращаме заявка към Worker-а (той няма да знае за csfiles отвън, защото той самият си я добавя)
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$WORKER_URL/$file")
-            echo "Status: $STATUS"
+          # Влизаме в csfiles и минаваме през всеки файл
+          cd csfiles && find . -type f \( -name "*" \) | sed 's|^\./||' | while read file; do
+            echo "Кеширам: $file"
+            # ТОВА Е КЛЮЧЪТ: Скриптът ИЗТЕГЛЯ целия файл през Worker-а, 
+            # което гарантира, че Cloudflare ще го запази на 100%.
+            curl -L -s -o /dev/null "$WORKER_URL/$file"
           done
