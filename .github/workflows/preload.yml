@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Get file list from GitHub API
         run: |
-          curl -s https://api.github.com/repos/USERNAME/REPO/git/trees/main?recursive=1 \
+          curl -s https://api.github.com/repos/mehmednizam28/fastdl/git/trees/main?recursive=1 \
           | grep '"path"' \
           | sed -E 's/.*"path": "([^"]+)".*/\1/' \
           > files.txt
