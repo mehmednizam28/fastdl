@@ -11,7 +11,7 @@ jobs:
       - name: Force Download Everything via Worker
         run: |
           # 1. ТВОЯТ ЛИНК
-          WORKER_URL="https://https://csfastdl.mehmednizam28.workers.dev"
+          WORKER_URL="https://csfastdl.mehmednizam28.workers.dev"
           
           echo "Започвам принудително кеширане на всички файлове..."
           
