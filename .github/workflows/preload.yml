@@ -1,35 +1,29 @@
-name: Auto Preload ALL
+name: Warm Cloudflare Cache
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  preload:
+  warm:
     runs-on: ubuntu-latest
 
     steps:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Fetch repo tree
+      - name: Get all files
         run: |
           curl -s https://api.github.com/repos/mehmednizam28/fastdl/git/trees/main?recursive=1 > tree.json
 
-      - name: Extract files safely
+      - name: Extract file list
         run: |
           jq -r '.tree[] | select(.type=="blob") | .path' tree.json > files.txt
 
-      - name: Filter csfiles
+      - name: Warm Cloudflare cache
         run: |
-          grep '^csfiles/' files.txt > filtered.txt || true
-
-      - name: Preload cache safely
-        run: |
-          while IFS= read -r file; do
-            if [ -n "$file" ]; then
-              echo "Caching $file"
-              curl -s --fail "https://csfastdl.mehmednizam28.workers.dev/" || true
-              sleep 0.05
-            fi
-          done < filtered.txt
+          while read file; do
+            echo "Warming $file"
+            curl -s "https://csfastdl.mehmednizam28.workers.dev/" > /dev/null
+            sleep 0.05
+          done < files.txt
